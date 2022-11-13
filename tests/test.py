@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
+import pytest
+import pytest_dependency
+import pytest_order
+
+# -*- coding: utf-8 -*-
+import pytest
+import pytest_dependency
+import pytest_order
 import json
 import os
-import pprint
 import re
+import subprocess
 import sys
 from io import StringIO
 from pathlib import Path
 from typing import Union, Optional
-
-import pytest
-
 
 @pytest.fixture
 def user_json(base_dir):
@@ -28,41 +33,125 @@ def user_json(base_dir):
             )
         return user_json
 
-
-def run_pytest_runner(__file__of_test):
+def run_pytest_runner(__file__of_test, setup_django: Optional[bool] = None):
     """
     Run tests from a test file.
     To be called from a test file like so:
 
     if __name__ == '__main__':
-        run_pytest_runner()
+        run_pytest_runner(__file__, setup_django=<True, False or None>)
 
-    This is how tests must be run in production
+    This is how tests must be run in production.
     """
+    def _setup_django():
+        import django
+        from django.conf import settings
+        if not settings.configured:
+            settings.configure()
+            django.setup()
+
+    if setup_django is None:
+        try:
+            _setup_django()
+        except Exception:
+            pass
+    elif setup_django:
+        _setup_django()
+
     pytest_runner = PytestRunner(__file__of_test)
     pytest_runner.run_capturing_traceback()
 
-
 def get_short_path(path: Union[Path, str], base_dir) -> Path:
     return Path(path).relative_to(base_dir)
-
 
 @pytest.fixture
 def base_dir() -> Path:
     return Path(__file__).parent
 
-
 @pytest.fixture
 def author_json_str(base_dir) -> str:
+    return """[
+{
+  "model": "ice_cream.topping",
+  "pk": 1,
+  "fields": {
+    "is_published": true,
+    "name": "Шоколадный Sgroppino (шоколад и лимонный шербет)",
+    "slug": "chilli_pandilla"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 2,
+  "fields": {
+    "is_published": true,
+    "name": "Chilli pandilla (перец и мёд)",
+    "slug": "chilli_pandilla"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 3,
+  "fields": {
+    "is_published": true,
+    "name": "Vari marmellata (ассорти из варенья)",
+    "slug": "vari_marmellata"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 4,
+  "fields": {
+    "is_published": true,
+    "name": "Кисельные берега (клюквенный кисель)",
+    "slug": "kissel"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 5,
+  "fields": {
+    "is_published": true,
+    "name": "Вилли Вонка (шоколадный соус)",
+    "slug": "villi_vonka"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 6,
+  "fields": {
+    "is_published": true,
+    "name": "Honey pot (ассорти из мёда)",
+    "slug": "honey_pot"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 7,
+  "fields": {
+    "is_published": true,
+    "name": "Сладкий топ (коктейль из сгущёнки, мёда и сахарного сиропа)",
+    "slug": "sweet_top"
+  }
+},
+{
+  "model": "ice_cream.topping",
+  "pk": 8,
+  "fields": {
+    "is_published": false,
+    "name": "Экстремально острый с перцем Каролинcкий жнец",
+    "slug": "carolina_reaper"
+  }
+}
+]
+"""
     fpath = base_dir / 'author.json'
     with open(fpath, 'r', encoding='utf-8') as f:
         return f.read()
 
-
 @pytest.fixture
 def author_json(author_json_str):
     return json.loads(author_json_str)
-
 
 class PytestRunner:
     """
@@ -93,7 +182,12 @@ class PytestRunner:
 
     @staticmethod
     def clean_msg(msg):
-        cleaned = re.sub(r'^E\s+', '', msg, flags=re.MULTILINE)
+        cleaned = msg
+        err_prefixes = re.findall(r'^E\s+', cleaned, flags=re.MULTILINE)
+        if err_prefixes:
+            cleaned = re.sub(
+                fr'^{err_prefixes[0]}', '', cleaned, flags=re.MULTILINE)
+        cleaned = re.sub(r'^E\s+', '', cleaned, flags=re.MULTILINE)
         cleaned = cleaned.replace('assert False', '')
         cleaned = cleaned.rstrip('\n')
         return cleaned
@@ -101,15 +195,21 @@ class PytestRunner:
     def run_capturing_traceback(self, with_args_for_webpack=False) -> None:
         if with_args_for_webpack:
             self.set_run_args_for_webpack()
-        with CapturingStdout() as traceback:
-            self.args = self.args.split()
-            if self.test_name_contains_expr:
-                self.args.append(f'-k {self.test_name_contains_expr}')
-            self.args.append(str(Path(self.path).as_posix()))
-            code = pytest.main(args=self.args)
-        if code == 1:
+
+        traceback = []
+        system_cmd = [f'pytest "{str(Path(self.path).as_posix())}"']
+        with subprocess.Popen(
+                system_cmd, stdout=subprocess.PIPE, bufsize=1,
+                universal_newlines=True, shell=True, text=True,
+                env=os.environ) as p:
+            for line in p.stdout:
+                traceback.append(line)
+
+        code = p.returncode
+
+        if int(code) != 0:
             cleaned_msg = ''
-            traceback_str = '\n'.join(traceback)
+            traceback_str = ''.join(traceback)
             if self.strip_traceback_to_err:
                 first_err_msg_re = (
                     r'^E\s+.*?(\w+Error|\w+Exception):([\w\W]+?)(?:^.+\1)')
@@ -121,7 +221,6 @@ class PytestRunner:
                     cleaned_msg = self.clean_msg(found[-1][1])
             if cleaned_msg:
                 assert False, cleaned_msg
-
 
 class CapturingStdout(list):
     """
@@ -142,7 +241,6 @@ class CapturingStdout(list):
         self.append(self._stringio.getvalue())
         self._stringio.close()
         del self._stringio
-
 
 def test_json_structure(user_json, author_json):
     all_field_vals = []
