@@ -1,0 +1,2 @@
+# requirements for building tests (webpacking)
+pytest-order==1.0.1

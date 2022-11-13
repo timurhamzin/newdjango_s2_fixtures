@@ -1,0 +1,15 @@
+**/conftest_joined*
+
+# ignore precode.json in production: student pushes precode.json to server
+precode.json
+
+yap_testing
+yap_testing/
+venv/
+.idea/
+.DS_Store
+precode.zip
+Dockerfile
+commit_docker.sh
+make_docker_n_run.sh
+.dockerignore
