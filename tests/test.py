@@ -145,9 +145,6 @@ def author_json_str(base_dir) -> str:
 }
 ]
 """
-    fpath = base_dir / 'author.json'
-    with open(fpath, 'r', encoding='utf-8') as f:
-        return f.read()
 
 @pytest.fixture
 def author_json(author_json_str):
