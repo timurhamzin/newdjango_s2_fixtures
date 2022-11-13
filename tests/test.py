@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-import pytest
-import pytest_dependency
-import pytest_order
 
-# -*- coding: utf-8 -*-
-import pytest
-import pytest_dependency
-import pytest_order
 import json
 import os
 import re
@@ -15,6 +8,10 @@ import sys
 from io import StringIO
 from pathlib import Path
 from typing import Union, Optional
+
+# -*- coding: utf-8 -*-
+import pytest
+
 
 @pytest.fixture
 def user_json(base_dir):
