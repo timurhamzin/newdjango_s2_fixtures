@@ -1,7 +1,7 @@
 **/conftest_joined*
 
-# ignore precode.json in production: student pushes precode.json to server
-precode.json
+# ignore student's code used in development
+tests/precode.json
 
 yap_testing
 yap_testing/
