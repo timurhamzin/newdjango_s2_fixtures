@@ -64,6 +64,7 @@
 },
 {
   "model": "ice_cream.topping",
+  "pk": 8,
   "fields": {
     "is_published": false,
     "name": "Экстремально острый с перцем Каролинcкий жнец",
