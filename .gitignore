@@ -8,7 +8,7 @@ yap_testing/
 venv/
 .idea/
 .DS_Store
-precode.zip
+*.zip
 Dockerfile
 commit_docker.sh
 make_docker_n_run.sh
