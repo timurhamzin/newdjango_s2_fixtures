@@ -9,7 +9,4 @@ venv/
 .idea/
 .DS_Store
 *.zip
-Dockerfile
-commit_docker.sh
-make_docker_n_run.sh
-.dockerignore
+docker/

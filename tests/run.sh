@@ -1,13 +1,9 @@
 cd /app/tests
 
-rm -f /app/pytest.ini || true
-rm -f /app/author.json || true
-rm -f /app/test.py || true
-
-mv ./pytest.ini /app/pytest.ini
-mv ./author.json /app/author.json
-mv ./test.py /app/test.py
-cp /app/precode.json ./precode.json
+# move files if exist
+[ -f ./pytest.ini ] && mv -f ./pytest.ini /app/pytest.ini
+[ -f ./author.json ] && mv -f ./author.json /app/author.json
+[ -f ./test.py ] && mv -f ./test.py /app/test.py
 
 # подавляем сообщение о необходимости обновить pip
 export PIP_DISABLE_PIP_VERSION_CHECK=1
