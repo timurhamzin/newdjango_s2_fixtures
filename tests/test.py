@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-import pytest
-import pytest_dependency
-import pytest_order
 
-# -*- coding: utf-8 -*-
-import pytest
-import pytest_dependency
-import pytest_order
 import json
 import os
 import re
@@ -16,9 +9,13 @@ from io import StringIO
 from pathlib import Path
 from typing import Union, Optional
 
+# -*- coding: utf-8 -*-
+import pytest
+
+
 @pytest.fixture
 def user_json(base_dir):
-    fname = 'precode.json'
+    fname = 'toppings.json'
     user_fpath = base_dir / fname
     user_rfpath = get_short_path(user_fpath, base_dir)
     assert os.path.isfile(user_fpath), (
