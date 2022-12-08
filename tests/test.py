@@ -15,7 +15,7 @@ import pytest
 
 @pytest.fixture
 def user_json(base_dir):
-    fname = 'precode.json'
+    fname = 'toppings.json'
     user_fpath = base_dir / fname
     user_rfpath = get_short_path(user_fpath, base_dir)
     assert os.path.isfile(user_fpath), (

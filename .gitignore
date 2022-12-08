@@ -1,13 +1,14 @@
 **/conftest_joined*
 
 # ignore student's code used in development
-tests/precode.json
+tests/toppings.json
 
 yap_testing
 yap_testing/
 venv/
 .idea/
-.DS_Store
+**/.DS_Store
 *.zip
-docker/
-__pycache__/
+#docker/
+**/__pycache__/
+**/.pytest_cache/

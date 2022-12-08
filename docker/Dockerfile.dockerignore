@@ -1,0 +1,10 @@
+**/docker/
+**/conftest_joined*
+**/yap_testing
+**/yap_testing/
+yap_testing
+yap_testing/
+**/*.zip
+**/venv/
+**/requirements_dev.txt
+
